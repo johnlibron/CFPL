@@ -37,13 +37,13 @@ def index(request):
                 ast = parser.parse()
                 if ast.error:
                     errors.append(ast.error.message())
-                """else:
+                else:
                     interpreter = Interpreter()
                     context = Context('<program>')
                     context.symbol_table = global_symbol_table
                     output = interpreter.visit(ast.node, context)
                     if output.error:
-                        errors.append(output.error.message())"""
+                        errors.append(output.error.message())
             
     ctx = {
         'tokens': tokens,

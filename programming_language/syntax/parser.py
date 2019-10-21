@@ -45,16 +45,17 @@ class Parser:
         return result
 
     # statements : NEWLINE*
-    #              (var-statement NEWLINE)*
+    #              var-statement* NEWLINE+
     #              KEYWORD:START NEWLINE+
-    #                (statement NEWLINE)*
-    #              KEYWORD:STOP
+    #                  statement* NEWLINE+
+    #                | KEYWORD:OUTPUT COLON expr NEWLINE+
+    #              KEYWORD:STOP NEWLINE+
     def statements(self):
         result = ParseResult()
         statements = []
         pos_start = self.current_token.pos_start.copy()
 
-        while self.current_token.type == Token.NEWLINE:
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
             result.register_advancement()
             self.advance()
 
@@ -67,17 +68,14 @@ class Parser:
 
             while True:
                 newline_count = 0
-                while self.current_token.type == Token.NEWLINE:
+                while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
                     result.register_advancement()
                     self.advance()
                     newline_count += 1
                 if newline_count == 0:
                     more_var_statements = False
 
-                if self.current_token.matches(Token.KEYWORD, Token.START):
-                    more_var_statements = False
-
-                if not more_var_statements: break
+                if not more_var_statements or self.current_token.matches(Token.KEYWORD, Token.START): break
                 statement = result.register(self.var_statement())
                 if result.error: return result
                 statements.append(statement)
@@ -103,7 +101,7 @@ class Parser:
         result.register_advancement()
         self.advance()
 
-        while self.current_token.type == Token.NEWLINE:
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
             result.register_advancement()
             self.advance()
         
@@ -115,12 +113,25 @@ class Parser:
 
         while True:
             newline_count = 0
-            while self.current_token.type == Token.NEWLINE:
+            while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
                 result.register_advancement()
                 self.advance()
                 newline_count += 1
             if newline_count == 0:
                 more_statements = False
+
+            if self.current_token.matches(Token.KEYWORD, Token.OUTPUT):
+                result.register_advancement()
+                self.advance()
+
+                if self.current_token.type != Token.COLON:
+                    return result.failure(InvalidSyntaxError(
+                        self.current_token.pos_start,
+                        "Expected 'COLON'"
+                    ))
+
+                result.register_advancement()
+                self.advance()
 
             if self.current_token.type == Token.EOL:
                 return result.failure(InvalidSyntaxError(
@@ -128,10 +139,7 @@ class Parser:
                     "Expected 'STOP'"
                 ))
 
-            if not self.current_token.matches(Token.KEYWORD, Token.STOP):
-                more_statements = True
-
-            if not more_statements: break
+            if not more_statements or self.current_token.matches(Token.KEYWORD, Token.STOP): break
             statement = result.register(self.statement())
             if result.error: return result
             statements.append(statement)
@@ -145,19 +153,21 @@ class Parser:
         result.register_advancement()
         self.advance()
 
-        return result.success(ListNode(statements, pos_start))
+        #while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
+        #    result.register_advancement()
+        #    self.advance()
+        #    if self.current_token.type == Token.EOL: break
 
-    # statement : expr
-    def statement(self):
-        result = ParseResult()
-        statement = result.register(self.expr())
-        if result.error: return result
-        return result.success(statement)
+        return result.success(ListNode(statements, pos_start))
 
     # var-statement : KEYWORD:VAR (var-assign COMMA)+ KEYWORD:AS DATA_TYPE
     def var_statement(self):
         result = ParseResult()
         variables = []
+
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
+            result.register_advancement()
+            self.advance()
 
         if not self.current_token.matches(Token.KEYWORD, Token.VAR):
             return result.failure(InvalidSyntaxError(
@@ -256,6 +266,18 @@ class Parser:
                 token.pos_start,
                 "Expected int, float, char, bool, or identifier"
             ))
+
+    # statement : expr
+    def statement(self):
+        result = ParseResult()
+        
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
+            result.register_advancement()
+            self.advance()
+
+        statement = result.register(self.expr())
+        if result.error: return result
+        return result.success(statement)
     
     # expr : comp-expr ((KEYWORD:AND|KEYWORD:OR) comp-expr)*
     def expr(self):
@@ -443,7 +465,7 @@ class Parser:
         result.register_advancement()
         self.advance()
 
-        while self.current_token.type == Token.NEWLINE:
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
             result.register_advancement()
             self.advance()
 
@@ -465,7 +487,7 @@ class Parser:
         result.register_advancement()
         self.advance()
 
-        while self.current_token.type == Token.NEWLINE:
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
             result.register_advancement()
             self.advance()
 
@@ -482,7 +504,7 @@ class Parser:
         result.register_advancement()
         self.advance()
 
-        while self.current_token.type == Token.NEWLINE:
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
             result.register_advancement()
             self.advance()
 
@@ -504,7 +526,7 @@ class Parser:
         result.register_advancement()
         self.advance()
 
-        while self.current_token.type == Token.NEWLINE:
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
             result.register_advancement()
             self.advance()
 
@@ -550,7 +572,7 @@ class Parser:
         result.register_advancement()
         self.advance()
 
-        while self.current_token.type == Token.NEWLINE:
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
             result.register_advancement()
             self.advance()
 
@@ -572,7 +594,7 @@ class Parser:
         result.register_advancement()
         self.advance()
 
-        while self.current_token.type == Token.NEWLINE:
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
             result.register_advancement()
             self.advance()
 
@@ -589,7 +611,7 @@ class Parser:
         result.register_advancement()
         self.advance()
 
-        while self.current_token.type == Token.NEWLINE:
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
             result.register_advancement()
             self.advance()
 
@@ -611,7 +633,7 @@ class Parser:
         result.register_advancement()
         self.advance()
 
-        while self.current_token.type == Token.NEWLINE:
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
             result.register_advancement()
             self.advance()
 
@@ -650,7 +672,7 @@ class Parser:
         result.register_advancement()
         self.advance()
 
-        while self.current_token.type == Token.NEWLINE:
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
             result.register_advancement()
             self.advance()
 
@@ -672,7 +694,7 @@ class Parser:
         result.register_advancement()
         self.advance()
 
-        while self.current_token.type == Token.NEWLINE:
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
             result.register_advancement()
             self.advance()
 
@@ -688,7 +710,7 @@ class Parser:
         result.register_advancement()
         self.advance()
 
-        while self.current_token.type == Token.NEWLINE:
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
             result.register_advancement()
             self.advance()
 
@@ -710,7 +732,7 @@ class Parser:
         result.register_advancement()
         self.advance()
 
-        while self.current_token.type == Token.NEWLINE:
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
             result.register_advancement()
             self.advance()
         
