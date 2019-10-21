@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+<div class="container">
+    <h4>CFPL - Language Specification</h4>
+    <br>
+    <form action="/" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="input">Input:</label>
+            <input type="text" name="input" value="{{request.POST.input}}" size="40" />
+        </div>
+        <div class="form-group">
+            <label for="source_code">Source Code:</label>
+            <br>
+            <textarea name="source_code" style="resize: none;word-wrap: break-word;" cols="50" rows="15">{{request.POST.source_code}}</textarea>
+            <textarea name="tokens" style="resize: none;" cols="80" rows="15" readonly>
+Tokens:
+{% if tokens|length > 0 %}[ {% for token in tokens %}{{ token }}{% if not forloop.last %}{{ " | " }}{% endif %}{% endfor %} ]{% endif %}
+
+{{ errors|length }} errors have found:
+{% for error in errors %}{{ error }}{% endfor %}
+            </textarea>
+        </div>
+        <div class="form-group">
+            <label for="output">Output:</label>
+            <input type="text" name="output" value="{{ output.value }}" size="40" readonly/>
+        </div>
+        <p><button type="submit" class="btn btn-info" style="width: 100px;">Run</button></p>
+    </form>
+</div>
+{% endblock %}
