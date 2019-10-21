@@ -30,10 +30,10 @@ class BoolNode:
 
 class ListNode:
 
-    def __init__(self, element_nodes, pos_start):
+    def __init__(self, element_nodes):
         self.element_nodes = element_nodes
 
-        self.pos_start = pos_start
+        self.pos_start = self.token.pos_start
 
 class VarAccessNode:
 

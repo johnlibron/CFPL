@@ -1,0 +1,56 @@
+parse           : statements KEYWORD:EOL
+
+statements      : NEWLINE*
+                  var-statement* NEWLINE+
+                  KEYWORD:START NEWLINE+
+                    statement* NEWLINE+ |
+                    KEYWORD:OUTPUT COLON expr NEWLINE+
+                  KEYWORD:STOP NEWLINE+
+
+var-statement   : KEYWORD:VAR (var-assign COMMA)+ KEYWORD:AS DATA_TYPE
+
+var-assign      : IDENTIFIER EQUAL var-value
+
+var-value       : INT|FLOAT|CHAR|BOOL|IDENTIFIER
+
+statement		: expr
+
+expr            : KEYWORD:VAR IDENTIFIER EQUAL expr
+                : comp-expr ((KEYWORD:AND|KEYWORD:OR) comp-expr)*
+
+comp-expr       : KEYWORD:NOT comp-expr
+                : arith-expr ((EE|NE|LT|GT|LTE|GTE) arith-expr)*
+
+arith-expr      : term ((PLUS|MINUS) term)*
+
+term            : factor ((MUL|DIV|MOD) factor)*
+
+factor          : (PLUS|MINUS) factor
+                : atom
+
+atom            : INT|FLOAT|CHAR|BOOL|IDENTIFIER
+                : LPAREN expr RPAREN
+                : if-expr
+                : while-expr
+
+if-expr         : KEYWORD:IF expr NEWLINE+
+                    KEYWORD:START NEWLINE+
+                        statements*
+                    KEYWORD:STOP NEWLINE+
+                | (if-expr-b|if-expr-c)
+                
+if-expr-b       : KEYWORD:ELIF expr NEWLINE+
+                    KEYWORD:START NEWLINE+
+                        statements*
+                    KEYWORD:STOP NEWLINE+
+                | (if-expr-b|if-expr-c)
+
+if-expr-c       : KEYWORD:ELSE NEWLINE+
+                    KEYWORD:START NEWLINE+
+                        statements*
+                    KEYWORD:STOP NEWLINE+
+
+while-expr      : KEYWORD:WHILE expr NEWLINE+
+                    KEYWORD:START NEWLINE+
+                        statements*
+                    KEYWORD:STOP NEWLINE+
