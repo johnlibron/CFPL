@@ -85,6 +85,8 @@ Token.KEYWORDS = [
     'AND',
     'OR',
     'NOT',
+    'TRUE',
+    'FALSE',
     'IF',
     'ELIF',
     'ELSE',
@@ -96,9 +98,9 @@ Token.KEYWORDS = [
 
 Token.DATA_TYPES = [
     'INT',
+    'FLOAT',
     'CHAR',
-    'BOOL',
-    'FLOAT'
+    'BOOL'
 ]
 
 Token.BOOL_VALUES = [

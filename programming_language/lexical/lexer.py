@@ -1,5 +1,5 @@
-from programming_language.error_handler.error import ExpectedCharacterError
 from programming_language.error_handler.error import IllegalCharacterError
+from programming_language.error_handler.error import IllegalVarDeclarationError
 from programming_language.error_handler.position import Position
 from programming_language.lexical.token import Token
 from programming_language.semantics.number import Number
@@ -23,20 +23,23 @@ class Lexer:
             if self.current_char in ' \t':
                 self.advance()
             elif self.current_char == '*':
-                tokens.append(Token(Token.COMMENT, pos_start=self.pos))
-                # multiply_or_skip_comment
-                tokens.append(self.skip_comment()) # Add Token.NEWLINE
+                length = len(tokens)-1
+                if length > 0 and tokens[length].type in (Token.INT, Token.FLOAT, Token.IDENTIFIER):
+                    tokens.append(Token(Token.MUL, pos_start=self.pos))
+                    self.advance()
+                else:
+                    tokens.append(self.skip_comment())
             elif self.current_char == ';':
                 tokens.append(Token(Token.NEWLINE, pos_start=self.pos))
                 self.advance()
-            #elif self.current_char == '#':
-            #    tokens.append(Token(Token.NEWLINE, pos_start=self.pos))
-            #    self.advance()
             elif self.current_char in Token.DIGITS:
                 tokens.append(self.make_number())
             elif self.current_char in Token.LETTERS:
+                pos_start = self.pos.copy()
                 tokens.append(self.make_keywords())
-                tokens = self.set_default_values(tokens)
+                tokens, error = self.set_default_values(tokens)
+                if error:
+                    return tokens, IllegalVarDeclarationError(pos_start, "" + error + "")
             elif self.current_char in '"\'':
                 tokens.append(self.make_string())
             elif self.current_char == '+':
@@ -127,7 +130,10 @@ class Lexer:
             escape_character = False
 
         self.advance()
-        return Token(Token.CHAR, string, pos_start)
+        if string in Token.BOOL_VALUES:
+            return Token(Token.BOOL, string, pos_start)
+        else:
+            return Token(Token.CHAR, string, pos_start)
         
     def make_keywords(self):
         id_str = ''
@@ -167,14 +173,13 @@ class Lexer:
                             else:
                                 tokens.insert(length+2, Token(Token.CHAR, Token.EMPTY, pos_start))
                         else:
-                            if data_type == Token.BOOL:
-                                tokens.pop(length+2)
-                                tokens.insert(length+2, Token(Token.BOOL, Token.TRUE, pos_start))
+                            if data_type != tokens[length+2].type:
+                                return [], "VAR " + tokens[length].value
                             data_value = None
                     elif token.type in Token.DATA_TYPES:
                         data_value = token.value
                     length -= 1
-        return tokens
+        return tokens, None
 
     def make_equals(self):
         token_type = Token.EQ
@@ -222,4 +227,4 @@ class Lexer:
 
         self.advance()
 
-        return Token(Token.NEWLINE, pos_start=pos_start)
+        return Token(Token.COMMENT, pos_start=pos_start)
