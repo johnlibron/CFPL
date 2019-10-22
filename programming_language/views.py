@@ -22,18 +22,18 @@ def index(request):
             lexemes = source_code.replace('\r\n', ';')
             # Generate tokens
             lexer = Lexer(lexemes)
-            tokens, error = lexer.make_tokens()
+            tokens, lexer_error = lexer.make_tokens()
 
-            if error:
-                errors.append(error.message())
+            if lexer_error:
+                errors.append(lexer_error.message())
             else:
                 inputs = request.POST.get('inputs', False)
                 # Generate input tokens
                 lexer = Lexer(inputs)
-                input_tokens, input_error = lexer.make_tokens()
+                input_tokens, input_lexer_error = lexer.make_tokens()
 
-                if input_error:
-                    errors.append(input_error.message())
+                if input_lexer_error:
+                    errors.append(input_lexer_error.message())
                 else:
                     # Generate AST
                     parser = Parser(tokens, input_tokens)

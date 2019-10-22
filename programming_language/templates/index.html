@@ -18,16 +18,12 @@
 Tokens:
 {% if tokens|length > 0 %}[ {% for token in tokens %}{{ token }}{% if not forloop.last %}{{ " | " }}{% endif %}{% endfor %} ]{% endif %}
 
-Abstract Syntax Tree:
-{% if errors|length == 0 %}{{ ast.node }}{% endif %}
+{% if errors|length == 0 %}No error was found.{% elif errors|length == 1 %}1 error was found:{% else %}{{ errors|length }} errors were found:{% endif %}
+{% if errors|length > 0 %}{% for error in errors %}{{ error }}{% endfor %}{% endif %}
 
-{{ errors|length }} errors have found:
-{% for error in errors %}{{ error }}{% endfor %}
+Output:
+{{ output }}
             </textarea>
-        </div>
-        <div class="form-group">
-            <label for="output">Output:</label>
-            <input type="text" name="output" value="{{ output }}" size="40" readonly/>
         </div>
         <p><button type="submit" class="btn btn-info" style="width: 100px;">Run</button></p>
     </form>

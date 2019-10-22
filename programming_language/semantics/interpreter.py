@@ -77,6 +77,8 @@ class Interpreter:
             answer, error = left.divide(right)
         elif node.operator_token.type == Token.MOD:
             answer, error = left.modulo(right)
+        elif node.operator_token.type == Token.CONCAT:
+            answer, error = left.concat(right)
         elif node.operator_token.type == Token.EE:
             answer, error = left.get_comparison_eq(right)
         elif node.operator_token.type == Token.NE:

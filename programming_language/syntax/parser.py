@@ -350,7 +350,7 @@ class Parser:
         return result.success(node)
 
     def arith_expr(self):
-        return self.binary_operation(self.term, (Token.PLUS, Token.MINUS))
+        return self.binary_operation(self.term, (Token.PLUS, Token.MINUS, Token.CONCAT))
 
     def term(self):
         return self.binary_operation(self.factor, (Token.MUL, Token.DIV, Token.MOD))
@@ -377,7 +377,7 @@ class Parser:
             self.advance()
             return result.success(NumberNode(token))
 
-        elif token.type == Token.CHAR:
+        elif token.type in (Token.CHAR, Token.CONCAT):
             result.register_advancement()
             self.advance()
             return result.success(StringNode(token))

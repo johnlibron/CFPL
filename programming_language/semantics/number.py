@@ -51,9 +51,12 @@ class Number(Value):
         else:
             return None, Value.illegal_operation(self, other)
 
-    def power(self, other):
+    def concat(self, other):
         if isinstance(other, Number):
-            return Number(self.value ** other.value).set_context(self.context), None
+            exponent = 10
+            while other.value >= exponent:
+                exponent *= 10
+            return Number(self.value * exponent + other.value).set_context(self.context), None
         else:
             return None, Value.illegal_operation(self, other)
 

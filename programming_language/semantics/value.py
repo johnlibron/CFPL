@@ -30,7 +30,7 @@ class Value:
     def modulo(self, other):
         return None, self.illegal_operation(other)
 
-    def power(self, other):
+    def concat(self, other):
         return None, self.illegal_operation(other)
 
     def get_comparison_eq(self, other):
