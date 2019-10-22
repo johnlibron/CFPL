@@ -1,5 +1,6 @@
 from programming_language.error_handler.error import IllegalCharacterError
 from programming_language.error_handler.error import IllegalVarDeclarationError
+from programming_language.error_handler.position import Position
 from programming_language.lexical.token import Token
 from programming_language.semantics.number import Number
 
@@ -86,6 +87,7 @@ class Lexer:
     def make_number(self):
         num_str = ''
         dot_count = 0
+        pos_start = self.pos.copy()
 
         while self.current_char != None and self.current_char in Token.DIGITS + '.':
             if self.current_char == '.':
@@ -95,9 +97,9 @@ class Lexer:
             self.advance()
 
         if dot_count == 0:
-            return Token(Token.INT, int(num_str))
+            return Token(Token.INT, int(num_str), pos_start)
         else:
-            return Token(Token.FLOAT, float(num_str))
+            return Token(Token.FLOAT, float(num_str), pos_start)
     
     def make_string(self):
         string = ''
@@ -133,7 +135,7 @@ class Lexer:
         else:
             return Token(Token.CHAR, string, pos_start)
         
-    def make_identifier(self):
+    def make_keywords(self):
         id_str = ''
         pos_start = self.pos.copy()
 

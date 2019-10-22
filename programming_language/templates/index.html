@@ -13,8 +13,8 @@
         <div class="form-group">
             <label for="source_code">Source Code:</label>
             <br>
-            <textarea name="source_code" style="resize: none;" cols="60" rows="15">{{request.POST.source_code}}</textarea>
-            <textarea name="tokens" style="resize: none;" cols="60" rows="15" readonly>
+            <textarea name="source_code" style="resize: none;word-wrap: break-word;" cols="50" rows="20">{{request.POST.source_code}}</textarea>
+            <textarea name="tokens" style="resize: none;" cols="80" rows="20" readonly>
 Tokens:
 {% if tokens|length > 0 %}[ {% for token in tokens %}{{ token }}{% if not forloop.last %}{{ " | " }}{% endif %}{% endfor %} ]{% endif %}
 

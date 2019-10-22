@@ -129,9 +129,9 @@ class Interpreter:
 
         if node.else_case:
             expr = node.else_case
-            else_value = result.register(self.visit(expr, context))
+            expr_value = result.register(self.visit(expr, context))
             if result.error: return result
-            return result.success(else_value)
+            return result.success(expr_value)
 
         return result.success(Number.null)
 
@@ -151,20 +151,3 @@ class Interpreter:
         return result.success(
             List(elements).set_context(context).set_pos(node.pos_start)
         )
-
-    def visit_CallNode(self, node, context):
-        result = RuntimeResult()
-        args = []
-
-        value_to_call = result.register(self.visit(node.node_to_call, context))
-        if result.error: return result
-        value_to_call = value_to_call.copy().set_pos(node.pos_start)
-
-        for arg_node in node.arg_nodes:
-            args.append(result.register(self.visit(arg_node, context)))
-            if result.error: return result
-
-        return_value = result.register(value_to_call.execute(args))
-        if result.error: return result
-        return_value = return_value.copy().set_pos(node.pos_start).set_context(context)
-        return result.success(return_value)

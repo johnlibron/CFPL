@@ -2,7 +2,6 @@ from programming_language.error_handler.error import InvalidSyntaxError
 from programming_language.lexical.token import Token
 from programming_language.syntax.nodes import BinaryOperatorNode
 from programming_language.syntax.nodes import BoolNode
-from programming_language.syntax.nodes import CallNode
 from programming_language.syntax.nodes import IfNode
 from programming_language.syntax.nodes import ListNode
 from programming_language.syntax.nodes import NumberNode
@@ -39,7 +38,7 @@ class Parser:
         if not result.error and self.current_token.type != Token.EOL:
             return result.failure(InvalidSyntaxError(
                 self.current_token.pos_start,
-                "Token cannot appear after previous tokens'"
+                "Invalid statement"
             ))
         return result
 
@@ -55,7 +54,7 @@ class Parser:
         if not self.current_token.matches(Token.KEYWORD, Token.START):
             statement = result.register(self.var_statement())
             if result.error: return result
-            statements.append(statement)
+            statements.extend(statement)
 
             more_var_statements = True
 
@@ -71,10 +70,12 @@ class Parser:
                 if not more_var_statements or self.current_token.matches(Token.KEYWORD, Token.START): break
                 statement = result.register(self.var_statement())
                 if result.error: return result
-                statements.append(statement)
+                statements.extend(statement)
 
         if self.current_token.type == Token.EOL:
             return result.success(ListNode(statements, pos_start))
+            
+        pos_start = self.current_token.pos_start.copy()
 
         if not self.current_token.matches(Token.KEYWORD, Token.START):
             return result.failure(InvalidSyntaxError(
@@ -100,7 +101,7 @@ class Parser:
         
         statement = result.register(self.statement())
         if result.error: return result
-        statements.append(statement)
+        statements.extend(statement)
 
         more_statements = True
 
@@ -135,7 +136,7 @@ class Parser:
             if not more_statements or self.current_token.matches(Token.KEYWORD, Token.STOP): break
             statement = result.register(self.statement())
             if result.error: return result
-            statements.append(statement)
+            statements.extend(statement)
 
         if not self.current_token.matches(Token.KEYWORD, Token.STOP):
             return result.failure(InvalidSyntaxError(
@@ -203,7 +204,7 @@ class Parser:
             self.current_token.pos_start,
             "Expected 'VAR', int, float, char, bool, identifier, 'AS', 'DATA_TYPE'"
         ))
-
+    
     def var_assign(self):
         result = ParseResult()
 
@@ -287,7 +288,7 @@ class Parser:
 
             expr = result.register(self.expr())
             if result.error: return result
-            
+
             return result.success(VarAssignNode(var_name, expr))
 
         node = result.register(self.binary_operation(self.comp_expr, ((Token.KEYWORD, Token.AND), (Token.KEYWORD, Token.OR))))
@@ -299,7 +300,7 @@ class Parser:
             ))
 
         return result.success(node)
-    
+
     def comp_expr(self):
         result = ParseResult()
 
@@ -340,7 +341,7 @@ class Parser:
             return result.success(UnaryOperatorNode(token, factor))
         
         return self.atom()
-    
+
     def atom(self):
         result = ParseResult()
         token = self.current_token
@@ -359,7 +360,7 @@ class Parser:
             result.register_advancement()
             self.advance()
             return result.success(BoolNode(token))
-            
+
         elif token.type == Token.IDENTIFIER:
             result.register_advancement()
             self.advance()
@@ -377,16 +378,16 @@ class Parser:
                     self.current_token.pos_start,
                     "Expected ')'"
                 ))
-
+                
             result.register_advancement()
             self.advance()
             return result.success(expr)
-            
+                
         elif token.matches(Token.KEYWORD, Token.IF):
             if_expr = result.register(self.if_expr())
             if result.error: return result
             return result.success(if_expr)
-            
+
         elif token.matches(Token.KEYWORD, Token.WHILE):
             while_expr = result.register(self.while_expr())
             if result.error: return result
@@ -612,7 +613,10 @@ class Parser:
         result = ParseResult()
         
         if not self.current_token.matches(Token.KEYWORD, Token.WHILE):
-            return result.failure(InvalidSyntaxError("Expected 'WHILE'"))
+            return result.failure(InvalidSyntaxError(
+                self.current_token.pos_start,
+                "Expected 'WHILE'"
+            ))
 
         result.register_advancement()
         self.advance()
@@ -620,31 +624,80 @@ class Parser:
         condition = result.register(self.expr())
         if result.error: return result
 
-        if not self.current_token.matches(Token.KEYWORD, Token.THEN):
-            return result.failure(InvalidSyntaxError("Expected 'THEN'"))
+        if self.current_token.type != Token.NEWLINE:
+            return result.failure(InvalidSyntaxError(
+                self.current_token.pos_start,
+                "Expected 'NEWLINE'"
+            ))
 
         result.register_advancement()
         self.advance()
-        
-        if self.current_token.type == Token.NEWLINE:
+
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
             result.register_advancement()
             self.advance()
 
-            body = result.register(self.statements())
-            if result.error: return result
+        if not self.current_token.matches(Token.KEYWORD, Token.START):
+            return result.failure(InvalidSyntaxError(
+                self.current_token.pos_start,
+                "Expected 'START'"
+            ))
 
-            if not self.current_token.matches(Token.KEYWORD, Token.END):
-                result.failure(InvalidSyntaxError("Expected 'END'"))
+        result.register_advancement()
+        self.advance()
 
+        if self.current_token.type != Token.NEWLINE:
+            return result.failure(InvalidSyntaxError(
+                self.current_token.pos_start,
+                "Expected 'NEWLINE'"
+            ))
+
+        result.register_advancement()
+        self.advance()
+
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
             result.register_advancement()
             self.advance()
-            
-            return result.success(WhileNode(condition, body, True))
 
-        body = result.register(self.expr())
+        body = result.register(self.statement())
         if result.error: return result
 
-        return result.success(WhileNode(condition, body, False))
+        if self.current_token.type != Token.NEWLINE:
+            return result.failure(InvalidSyntaxError(
+                self.current_token.pos_start,
+                "Expected 'NEWLINE'"
+            ))
+
+        result.register_advancement()
+        self.advance()
+
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
+            result.register_advancement()
+            self.advance()
+
+        if not self.current_token.matches(Token.KEYWORD, Token.STOP):
+            return result.failure(InvalidSyntaxError(
+                self.current_token.pos_start,
+                "Expected 'STOP'"
+            ))
+
+        result.register_advancement()
+        self.advance()
+
+        if self.current_token.type != Token.NEWLINE:
+            return result.failure(InvalidSyntaxError(
+                self.current_token.pos_start,
+                "Expected 'NEWLINE'"
+            ))
+
+        result.register_advancement()
+        self.advance()
+
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
+            result.register_advancement()
+            self.advance()
+        
+        return result.success(WhileNode(condition, body))
 
     def binary_operation(self, func_a, ops, func_b=None):
         if func_b == None: func_b = func_a
