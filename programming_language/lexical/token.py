@@ -34,7 +34,6 @@ Token.CHAR           = 'CHAR'
 Token.BOOL           = 'BOOL'
 Token.FLOAT          = 'FLOAT'
 
-Token.EMPTY          = 'EMPTY'
 Token.TRUE           = 'TRUE'
 Token.FALSE          = 'FALSE'
 

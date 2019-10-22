@@ -14,24 +14,25 @@ from programming_language.syntax.parse_result import ParseResult
 
 class Parser:
 
-    def __init__(self, tokens):
+    def __init__(self, tokens, input_tokens):
         self.tokens = tokens
+        self.input_tokens = input_tokens
         self.token_index = -1
+        self.input_token_index = -1
         self.advance()
+        self.input_advance()
 
     def advance(self, ):
         self.token_index += 1
-        self.update_current_token()
-        return self.current_token
-
-    def reverse(self, amount=1):
-        self.token_index -= amount
-        self.update_current_token()
-        return self.current_token
-    
-    def update_current_token(self):
         if self.token_index >= 0 and self.token_index < len(self.tokens):
             self.current_token = self.tokens[self.token_index]
+        return self.current_token
+
+    def input_advance(self, ):
+        self.input_token_index += 1
+        if self.input_token_index >= 0 and self.input_token_index < len(self.input_tokens):
+            self.current_input_token = self.input_tokens[self.input_token_index]
+        return self.current_input_token
 
     def parse(self):
         result = self.statements()
@@ -100,9 +101,10 @@ class Parser:
             result.register_advancement()
             self.advance()
         
-        statement = result.register(self.statement())
-        if result.error: return result
-        statements.append(statement)
+        if not self.current_token.matches(Token.KEYWORD, Token.OUTPUT):
+            statement = result.register(self.statement())
+            if result.error: return result
+            statements.append(statement)
 
         more_statements = True
 
@@ -128,9 +130,21 @@ class Parser:
                 result.register_advancement()
                 self.advance()
 
-                output = self.current_token
+                output = self.current_token.value
                 #output = result.register(self.statement())
                 #if result.error: return result
+
+                result.register_advancement()
+                self.advance()
+
+                if self.current_token.type != Token.NEWLINE:
+                    return result.failure(InvalidSyntaxError(
+                        self.current_token.pos_start,
+                        "Expected 'NEWLINE'"
+                    ))
+
+                result.register_advancement()
+                self.advance()
 
             if self.current_token.type == Token.EOL:
                 return result.failure(InvalidSyntaxError(
@@ -235,11 +249,17 @@ class Parser:
         var_value = result.register(self.var_value())
         if result.error: return result
 
+        if self.current_input_token.type == Token.COMMA and self.current_input_token != Token.EOL:
+            self.input_advance()
+
         return result.success(VarAssignNode(var_name, var_value))
 
     def var_value(self):
         result = ParseResult()
         token = self.current_token
+        if self.current_input_token.type in (Token.INT, Token.FLOAT, Token.CHAR, Token.BOOL) and self.current_input_token != Token.EOL:
+            token = self.current_input_token
+            self.input_advance()
 
         if token.type in (Token.INT, Token.FLOAT):
             result.register_advancement()

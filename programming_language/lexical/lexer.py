@@ -170,7 +170,7 @@ class Lexer:
                             elif data_type == Token.BOOL:
                                 tokens.insert(length+2, Token(Token.BOOL, Token.FALSE, pos_start))
                             else:
-                                tokens.insert(length+2, Token(Token.CHAR, Token.EMPTY, pos_start))
+                                tokens.insert(length+2, Token(Token.CHAR, "", pos_start))
                         else:
                             if data_type != tokens[length+2].type:
                                 return [], "VAR " + tokens[length].value
