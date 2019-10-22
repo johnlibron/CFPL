@@ -290,6 +290,24 @@ class Parser:
             result.register_advancement()
             self.advance()
 
+        if self.current_token.type != Token.IDENTIFIER:
+            return result.failure(InvalidSyntaxError(
+                self.current_token.pos_start,
+                "Expected identifier"
+            ))
+
+        result.register_advancement()
+        self.advance()
+
+        if self.current_token.type != Token.EQ:
+            return result.failure(InvalidSyntaxError(
+                self.current_token.pos_start,
+                "Expected '='"
+            ))
+
+        result.register_advancement()
+        self.advance()
+
         statement = result.register(self.expr())
 
         if result.error:
@@ -308,19 +326,14 @@ class Parser:
             result.register_advancement()
             self.advance()
 
-            if self.current_token.type != Token.EQ:
-                return result.failure(InvalidSyntaxError(
-                    self.current_token.pos_start,
-                    "Expected '='"
-                ))
+            if self.current_token.type == Token.EQ:
+                result.register_advancement()
+                self.advance()
 
-            result.register_advancement()
-            self.advance()
+                expr = result.register(self.expr())
+                if result.error: return result
 
-            expr = result.register(self.expr())
-            if result.error: return result
-
-            return result.success(VarAssignNode(var_name, expr))
+                return result.success(VarAssignNode(var_name, expr))
 
         node = result.register(self.binary_operation(self.comp_expr, ((Token.KEYWORD, Token.AND), (Token.KEYWORD, Token.OR))))
         if result.error: return result
