@@ -45,6 +45,7 @@ class Parser:
     def statements(self):
         result = ParseResult()
         statements = []
+        output = None
         pos_start = self.current_token.pos_start.copy()
 
         while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
@@ -101,7 +102,7 @@ class Parser:
         
         statement = result.register(self.statement())
         if result.error: return result
-        statements.extend(statement)
+        statements.append(statement)
 
         more_statements = True
 
@@ -127,6 +128,10 @@ class Parser:
                 result.register_advancement()
                 self.advance()
 
+                output = self.current_token
+                #output = result.register(self.statement())
+                #if result.error: return result
+
             if self.current_token.type == Token.EOL:
                 return result.failure(InvalidSyntaxError(
                     self.current_token.pos_start,
@@ -136,7 +141,7 @@ class Parser:
             if not more_statements or self.current_token.matches(Token.KEYWORD, Token.STOP): break
             statement = result.register(self.statement())
             if result.error: return result
-            statements.extend(statement)
+            statements.append(statement)
 
         if not self.current_token.matches(Token.KEYWORD, Token.STOP):
             return result.failure(InvalidSyntaxError(
@@ -147,12 +152,12 @@ class Parser:
         result.register_advancement()
         self.advance()
 
-        #while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
-        #    result.register_advancement()
-        #    self.advance()
-        #    if self.current_token.type == Token.EOL: break
-
-        return result.success(ListNode(statements, pos_start))
+        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
+            result.register_advancement()
+            self.advance()
+            if self.current_token.type == Token.EOL: break
+        
+        return result.success(ListNode(statements, pos_start), output)
 
     def var_statement(self):
         result = ParseResult()
@@ -266,7 +271,13 @@ class Parser:
             self.advance()
 
         statement = result.register(self.expr())
-        if result.error: return result
+
+        if result.error:
+            return result.failure(InvalidSyntaxError(
+                self.current_token.pos_start,
+                "Invalid statement"
+            ))
+
         return result.success(statement)
     
     def expr(self):
@@ -292,12 +303,7 @@ class Parser:
             return result.success(VarAssignNode(var_name, expr))
 
         node = result.register(self.binary_operation(self.comp_expr, ((Token.KEYWORD, Token.AND), (Token.KEYWORD, Token.OR))))
-
-        if result.error:
-            return result.failure(InvalidSyntaxError(
-                self.current_token.pos_start,
-                "Expected expr"
-            ))
+        if result.error: return result
 
         return result.success(node)
 

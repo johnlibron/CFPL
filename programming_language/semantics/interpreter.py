@@ -21,6 +21,9 @@ class Interpreter:
     def visit_StringNode(self, node, context):
         return RuntimeResult().success(String(node.token.value).set_context(context).set_pos(node.pos_start))
 
+    def visit_BoolNode(self, node, context):
+        return RuntimeResult().success(String(node.token.value).set_context(context).set_pos(node.pos_start))
+
     def visit_ListNode(self, node, context):
         result = RuntimeResult()
         elements = []
@@ -74,8 +77,6 @@ class Interpreter:
             answer, error = left.divide(right)
         elif node.operator_token.type == Token.MOD:
             answer, error = left.modulo(right)
-        elif node.operator_token.type == Token.POW:
-            answer, error = left.power(right)
         elif node.operator_token.type == Token.EE:
             answer, error = left.get_comparison_eq(right)
         elif node.operator_token.type == Token.NE:

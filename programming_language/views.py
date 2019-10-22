@@ -9,11 +9,6 @@ from programming_language.semantics.context import Context
 from programming_language.semantics.interpreter import Interpreter
 from programming_language.semantics.number import Number
 
-global_symbol_table = SymbolTable()
-global_symbol_table.set("NULL", Number.null)
-global_symbol_table.set("FALSE", Number.false)
-global_symbol_table.set("TRUE", Number.true)
-
 def index(request):
     tokens = None
     ast = None
@@ -40,10 +35,15 @@ def index(request):
                 else:
                     interpreter = Interpreter()
                     context = Context('<program>')
-                    context.symbol_table = global_symbol_table
-                    output = interpreter.visit(ast.node, context)
-                    if output.error:
-                        errors.append(output.error.message())
+                    context.symbol_table = SymbolTable()
+                    context.symbol_table.set("NULL", Number.null)
+                    context.symbol_table.set("FALSE", Number.false)
+                    context.symbol_table.set("TRUE", Number.true)
+                    result = interpreter.visit(ast.node, context)
+                    if result.error:
+                        errors.append(result.error.message())
+                    else:
+                        output = context.symbol_table.get(ast.output)
             
     ctx = {
         'tokens': tokens,

@@ -2,6 +2,7 @@ class ParseResult:
 
     def __init__(self):
         self.node = None
+        self.output = None
         self.error = None
         self.last_registered_advance_count = 0
         self.advance_count = 0
@@ -16,8 +17,9 @@ class ParseResult:
         if result.error: self.error = result.error
         return result.node
 
-    def success(self, node):
+    def success(self, node, output=None):
         self.node = node
+        self.output = output
         return self
 
     def failure(self, error):
