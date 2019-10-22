@@ -123,7 +123,3 @@ class Number(Value):
             return self.value != Token.FALSE
         else:
             return self.value != 0
-
-Number.null = Number(0)
-Number.false = Number(0)
-Number.true = Number(1)

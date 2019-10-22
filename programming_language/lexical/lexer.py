@@ -3,6 +3,7 @@ from programming_language.error_handler.error import IllegalVarDeclarationError
 from programming_language.error_handler.position import Position
 from programming_language.lexical.token import Token
 from programming_language.semantics.number import Number
+from programming_language.semantics.string import String
 
 class Lexer:
 
@@ -164,13 +165,13 @@ class Lexer:
                         if data_value == None and tokens[length+1].type != Token.EQ:
                             tokens.insert(length+1, Token(Token.EQ, None, pos_start))
                             if data_type == Token.INT:
-                                tokens.insert(length+2, Token(Token.INT, Number.null, pos_start))
+                                tokens.insert(length+2, Token(Token.INT, Number(0), pos_start))
                             elif data_type == Token.FLOAT:
-                                tokens.insert(length+2, Token(Token.FLOAT, Number.null, pos_start))
+                                tokens.insert(length+2, Token(Token.FLOAT, Number(0), pos_start))
                             elif data_type == Token.BOOL:
                                 tokens.insert(length+2, Token(Token.BOOL, Token.FALSE, pos_start))
                             else:
-                                tokens.insert(length+2, Token(Token.CHAR, "", pos_start))
+                                tokens.insert(length+2, Token(Token.CHAR, String(""), pos_start))
                         else:
                             if data_type != tokens[length+2].type:
                                 return [], "VAR " + tokens[length].value

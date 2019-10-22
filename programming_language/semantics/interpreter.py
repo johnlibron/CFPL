@@ -136,8 +136,6 @@ class Interpreter:
             if result.error: return result
             return result.success(expr_value)
 
-        return result.success(Number.null)
-
     def visit_WhileNode(self, node, context):
         result = RuntimeResult()
         elements = []

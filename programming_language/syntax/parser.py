@@ -130,12 +130,13 @@ class Parser:
                 result.register_advancement()
                 self.advance()
 
-                output = self.current_token.value
-                #output = result.register(self.statement())
-                #if result.error: return result
-
-                result.register_advancement()
-                self.advance()
+                # TODO Create function to evaluate the output expr
+                output = result.register(self.expr())
+                if result.error:
+                    return result.failure(InvalidSyntaxError(
+                        self.current_token.pos_start,
+                        "Invalid output statement"
+                    ))
 
                 if self.current_token.type != Token.NEWLINE:
                     return result.failure(InvalidSyntaxError(
@@ -323,6 +324,15 @@ class Parser:
 
         node = result.register(self.binary_operation(self.comp_expr, ((Token.KEYWORD, Token.AND), (Token.KEYWORD, Token.OR))))
         if result.error: return result
+
+        if self.current_token.type == Token.EQ:
+            result.register_advancement()
+            self.advance()
+            
+            expr = result.register(self.expr())
+            if result.error: return result
+
+            return result.success(expr)
 
         return result.success(node)
 
