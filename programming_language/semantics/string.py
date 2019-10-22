@@ -13,15 +13,9 @@ class String(Value):
     def __str__(self):
         return self.value
 
-    def add(self, other):
+    def concat(self, other):
         if isinstance(other, String):
             return String(self.value + other.value).set_context(self.context), None
-        else:
-            return None, Value.illegal_operation(self, other)
-
-    def multiply(self, other):
-        if isinstance(other, Number):
-            return String(self.value * other.value).set_context(self.context), None
         else:
             return None, Value.illegal_operation(self, other)
 

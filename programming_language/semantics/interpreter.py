@@ -109,14 +109,14 @@ class Interpreter:
         error = None
 
         if node.operator_token.type == Token.MINUS:
-            number, error = number.multiply(Number(-1))
+            answer, error = number.multiply(Number(-1))
         elif node.operator_token.matches(Token.KEYWORD, Token.NOT):
             answer, error = number.logical_not()
 
         if error:
             return result.failure(error)
         else:
-            return result.success(number.set_pos(node.pos_start))
+            return result.success(answer.set_pos(node.pos_start))
 
     def visit_IfNode(self, node, context):
         result = RuntimeResult()

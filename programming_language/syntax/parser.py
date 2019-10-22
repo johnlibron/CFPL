@@ -296,6 +296,7 @@ class Parser:
                 "Expected identifier"
             ))
 
+        var_name = self.current_token
         result.register_advancement()
         self.advance()
 
@@ -308,32 +309,17 @@ class Parser:
         result.register_advancement()
         self.advance()
 
-        statement = result.register(self.expr())
-
+        expr = result.register(self.expr())
         if result.error:
             return result.failure(InvalidSyntaxError(
                 self.current_token.pos_start,
                 "Invalid statement"
             ))
 
-        return result.success(statement)
+        return result.success(VarAssignNode(var_name, expr))
     
     def expr(self):
         result = ParseResult()
-
-        if self.current_token.type == Token.IDENTIFIER:
-            var_name = self.current_token
-            result.register_advancement()
-            self.advance()
-
-            if self.current_token.type == Token.EQ:
-                result.register_advancement()
-                self.advance()
-
-                expr = result.register(self.expr())
-                if result.error: return result
-
-                return result.success(VarAssignNode(var_name, expr))
 
         node = result.register(self.binary_operation(self.comp_expr, ((Token.KEYWORD, Token.AND), (Token.KEYWORD, Token.OR))))
         if result.error: return result

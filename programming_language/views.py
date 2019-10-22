@@ -44,9 +44,6 @@ def index(request):
                         interpreter = Interpreter()
                         context = Context('<program>')
                         context.symbol_table = SymbolTable()
-                        context.symbol_table.set("NULL", Number.null)
-                        context.symbol_table.set("FALSE", Number.false)
-                        context.symbol_table.set("TRUE", Number.true)
                         result = interpreter.visit(ast.node, context)
                         if result.error:
                             errors.append(result.error.message())

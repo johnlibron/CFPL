@@ -1,4 +1,5 @@
 from programming_language.error_handler.error import RuntimeError
+from programming_language.lexical.token import Token
 from programming_language.semantics.value import Value
 
 class Number(Value):
@@ -62,54 +63,54 @@ class Number(Value):
 
     def get_comparison_eq(self, other):
         if isinstance(other, Number):
-            return Number(int(self.value == other.value)).set_context(self.context), None
+            return Number(Token.TRUE if self.value == other.value else Token.FALSE).set_context(self.context), None
         else:
             return None, Value.illegal_operation(self, other)
 
     def get_comparison_ne(self, other):
         if isinstance(other, Number):
-            return Number(int(self.value != other.value)).set_context(self.context), None
+            return Number(Token.TRUE if self.value != other.value else Token.FALSE).set_context(self.context), None
         else:
             return None, Value.illegal_operation(self, other)
 
     def get_comparison_lt(self, other):
         if isinstance(other, Number):
-            return Number(int(self.value < other.value)).set_context(self.context), None
+            return Number(Token.TRUE if self.value < other.value else Token.FALSE).set_context(self.context), None
         else:
             return None, Value.illegal_operation(self, other)
 
     def get_comparison_gt(self, other):
         if isinstance(other, Number):
-            return Number(int(self.value > other.value)).set_context(self.context), None
+            return Number(Token.TRUE if self.value > other.value else Token.FALSE).set_context(self.context), None
         else:
             return None, Value.illegal_operation(self, other)
 
     def get_comparison_lte(self, other):
         if isinstance(other, Number):
-            return Number(int(self.value <= other.value)).set_context(self.context), None
+            return Number(Token.TRUE if self.value <= other.value else Token.FALSE).set_context(self.context), None
         else:
             return None, Value.illegal_operation(self, other)
 
     def get_comparison_gte(self, other):
         if isinstance(other, Number):
-            return Number(int(self.value >= other.value)).set_context(self.context), None
+            return Number(Token.TRUE if self.value >= other.value else Token.FALSE).set_context(self.context), None
         else:
             return None, Value.illegal_operation(self, other)
 
     def get_comparison_and(self, other):
         if isinstance(other, Number):
-            return Number(int(self.value and other.value)).set_context(self.context), None
+            return Number(self.value and other.value).set_context(self.context), None
         else:
             return None, Value.illegal_operation(self, other)
 
     def get_comparison_or(self, other):
         if isinstance(other, Number):
-            return Number(int(self.value or other.value)).set_context(self.context), None
+            return Number(self.value or other.value).set_context(self.context), None
         else:
             return None, Value.illegal_operation(self, other)
 
     def logical_not(self):
-        return Number(1 if self.value == 0 else 0).set_context(self.context), None
+        return Number(Token.TRUE if self.value == Token.FALSE else Token.FALSE).set_context(self.context), None
 
     def copy(self):
         copy = Number(self.value)
@@ -118,7 +119,10 @@ class Number(Value):
         return copy
 
     def is_true(self):
-        return self.value != 0
+        if self.value in (Token.TRUE, Token.FALSE):
+            return self.value != Token.FALSE
+        else:
+            return self.value != 0
 
 Number.null = Number(0)
 Number.false = Number(0)
