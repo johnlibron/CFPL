@@ -48,7 +48,7 @@ def index(request):
                         if result.error:
                             errors.append(result.error.message())
                         else:
-                            output = ast.output
+                            output = context.symbol_table.get(Token.OUTPUT)
             
     ctx = {
         'tokens': tokens,

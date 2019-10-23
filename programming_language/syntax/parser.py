@@ -46,7 +46,6 @@ class Parser:
     def statements(self):
         result = ParseResult()
         statements = []
-        output = None
         pos_start = self.current_token.pos_start.copy()
 
         while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
@@ -118,6 +117,7 @@ class Parser:
                 more_statements = False
 
             if self.current_token.matches(Token.KEYWORD, Token.OUTPUT):
+                var_name = self.current_token
                 result.register_advancement()
                 self.advance()
 
@@ -130,13 +130,14 @@ class Parser:
                 result.register_advancement()
                 self.advance()
 
-                # TODO Create function to evaluate the output expr
                 output = result.register(self.expr())
                 if result.error:
                     return result.failure(InvalidSyntaxError(
                         self.current_token.pos_start,
                         "Invalid output statement"
                     ))
+
+                statements.append(VarAssignNode(var_name, output))
 
                 if self.current_token.type != Token.NEWLINE:
                     return result.failure(InvalidSyntaxError(
@@ -172,7 +173,7 @@ class Parser:
             self.advance()
             if self.current_token.type == Token.EOL: break
         
-        return result.success(ListNode(statements, pos_start), output)
+        return result.success(ListNode(statements, pos_start))
 
     def var_statement(self):
         result = ParseResult()
@@ -322,6 +323,9 @@ class Parser:
     def expr(self):
         result = ParseResult()
 
+        if self.current_token.type == Token.IDENTIFIER:
+            var_name = self.current_token
+
         node = result.register(self.binary_operation(self.comp_expr, ((Token.KEYWORD, Token.AND), (Token.KEYWORD, Token.OR))))
         if result.error: return result
 
@@ -331,8 +335,7 @@ class Parser:
             
             expr = result.register(self.expr())
             if result.error: return result
-
-            return result.success(expr)
+            return result.success(VarAssignNode(var_name, expr))
 
         return result.success(node)
 

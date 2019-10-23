@@ -1,5 +1,6 @@
 from programming_language.error_handler.error import IllegalCharacterError
 from programming_language.error_handler.error import IllegalVarDeclarationError
+from programming_language.error_handler.error import InvalidSyntaxError
 from programming_language.error_handler.position import Position
 from programming_language.lexical.token import Token
 from programming_language.semantics.number import Number
@@ -25,7 +26,7 @@ class Lexer:
                 self.advance()
             elif self.current_char == '*':
                 length = len(tokens)-1
-                if length > 0 and tokens[length].type in (Token.INT, Token.FLOAT, Token.IDENTIFIER):
+                if length > 0 and tokens[length].type != Token.NEWLINE:
                     tokens.append(Token(Token.MUL, pos_start=self.pos))
                     self.advance()
                 else:
@@ -42,7 +43,10 @@ class Lexer:
                 if error:
                     return tokens, IllegalVarDeclarationError(pos_start, "" + error + "")
             elif self.current_char in '"\'':
-                tokens.append(self.make_string())
+                token, error = self.make_string()
+                if error:
+                    return tokens, InvalidSyntaxError(pos_start, "" + error + "")
+                tokens.append(token)                
             elif self.current_char == '+':
                 tokens.append(Token(Token.PLUS, pos_start=self.pos)) # Token.POSITIVE
                 self.advance()
@@ -114,6 +118,9 @@ class Lexer:
             'r': '\r'
         }
 
+        has_left_square_bracket = False
+        has_right_square_bracket = False
+
         while self.current_char != None and (self.current_char not in '"\'' or escape_character):
             if escape_character:
                 string += escape_characters.get(self.current_char, self.current_char)
@@ -121,20 +128,25 @@ class Lexer:
                 if self.current_char == '\\':
                     escape_character = True
                 else:
-                    if self.current_char == "[":
-                        print("the square braces([]) are as escape code")
-                    elif self.current_char == "]":
-                        print("the square braces([]) are as escape code")
+                    if self.current_char == "[" and not has_left_square_bracket:
+                        has_left_square_bracket = True
+                    elif self.current_char == "]" and not has_right_square_bracket:
+                        has_right_square_bracket = True
+                    elif self.current_char == "#" and not has_left_square_bracket and not has_right_square_bracket:
+                        string += '\n'
                     else:
                         string += self.current_char
             self.advance()
             escape_character = False
 
+        if has_left_square_bracket and not has_right_square_bracket:
+            return None, "Expected ']'"
+
         self.advance()
         if string in Token.BOOL_VALUES:
-            return Token(Token.BOOL, string, pos_start)
+            return Token(Token.BOOL, string, pos_start), None
         else:
-            return Token(Token.CHAR, string, pos_start)
+            return Token(Token.CHAR, string, pos_start), None
         
     def make_keywords(self):
         id_str = ''

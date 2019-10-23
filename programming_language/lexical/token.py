@@ -54,9 +54,6 @@ Token.GT             = 'GREATER_THAN'
 Token.LTE            = 'LESS_THAN_OR_EQUAL_TO'
 Token.GTE            = 'GREATER_THAN_OR_EQUAL_TO'
 
-Token.POSITIVE       = 'POSITIVE'
-Token.NEGATIVE       = 'NEGATIVE'
-
 Token.IF             = 'IF'
 Token.ELIF           = 'ELIF'
 Token.ELSE           = 'ELSE'
@@ -65,8 +62,6 @@ Token.WHILE          = 'WHILE'
 
 Token.LPAREN         = 'LPAREN'
 Token.RPAREN         = 'RPAREN'
-Token.LSQUARE        = 'LSQUARE'
-Token.RSQUARE        = 'RSQUARE'
 Token.CONCAT         = 'CONCAT'
 Token.COMMA          = 'COMMA'
 Token.COLON          = 'COLON'

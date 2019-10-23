@@ -11,7 +11,6 @@ class Number(Value):
     def __str__(self):
         return str(self.value)
 
-
     def __repr__(self):
         return str(self.value)
 
@@ -53,11 +52,8 @@ class Number(Value):
             return None, Value.illegal_operation(self, other)
 
     def concat(self, other):
-        if isinstance(other, Number):
-            exponent = 10
-            while other.value >= exponent:
-                exponent *= 10
-            return Number(self.value * exponent + other.value).set_context(self.context), None
+        if isinstance(other, Number) or isinstance(other.value, str):
+            return Number(str(self.value) + str(other.value)).set_context(self.context), None
         else:
             return None, Value.illegal_operation(self, other)
 
@@ -97,21 +93,6 @@ class Number(Value):
         else:
             return None, Value.illegal_operation(self, other)
 
-    def get_comparison_and(self, other):
-        if isinstance(other, Number):
-            return Number(self.value and other.value).set_context(self.context), None
-        else:
-            return None, Value.illegal_operation(self, other)
-
-    def get_comparison_or(self, other):
-        if isinstance(other, Number):
-            return Number(self.value or other.value).set_context(self.context), None
-        else:
-            return None, Value.illegal_operation(self, other)
-
-    def logical_not(self):
-        return Number(Token.TRUE if self.value == Token.FALSE else Token.FALSE).set_context(self.context), None
-
     def copy(self):
         copy = Number(self.value)
         copy.set_pos(self.pos_start)
@@ -119,7 +100,4 @@ class Number(Value):
         return copy
 
     def is_true(self):
-        if self.value in (Token.TRUE, Token.FALSE):
-            return self.value != Token.FALSE
-        else:
-            return self.value != 0
+        return self.value != 0
