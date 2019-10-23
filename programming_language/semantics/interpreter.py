@@ -121,7 +121,9 @@ class Interpreter:
 
     def visit_IfNode(self, node, context):
         result = RuntimeResult()
-
+        is_condition = False
+        expr_value = None
+        
         for condition, expr in node.cases:
             condition_value = result.register(self.visit(condition, context))
             if result.error: return result
@@ -129,11 +131,14 @@ class Interpreter:
             if condition_value.is_true():
                 expr_value = result.register(self.visit(expr, context))
                 if result.error: return result
-                return result.success(expr_value)
+                if not is_condition:
+                    is_condition = True
+
+        if is_condition:
+            return result.success(expr_value)
 
         if node.else_case:
-            expr = node.else_case
-            expr_value = result.register(self.visit(expr, context))
+            expr_value = result.register(self.visit(node.else_case, context))
             if result.error: return result
             return result.success(expr_value)
 

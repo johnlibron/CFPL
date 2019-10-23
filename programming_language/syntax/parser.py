@@ -507,31 +507,28 @@ class Parser:
             result.register_advancement()
             self.advance()
 
-        statement = result.register(self.statement())
-        if result.error: return result
-        else_case = statement
+        while True:
+            statement = result.register(self.statement())
+            if result.error: return result
+            else_case = statement
 
-        if self.current_token.type != Token.NEWLINE:
-            return result.failure(InvalidSyntaxError(
-                self.current_token.pos_start,
-                "Expected 'NEWLINE'"
-            ))
+            if self.current_token.type != Token.NEWLINE:
+                return result.failure(InvalidSyntaxError(
+                    self.current_token.pos_start,
+                    "Expected 'NEWLINE'"
+                ))
 
-        result.register_advancement()
-        self.advance()
-
-        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
             result.register_advancement()
             self.advance()
 
-        if not self.current_token.matches(Token.KEYWORD, Token.STOP):
-            return result.failure(InvalidSyntaxError(
-                self.current_token.pos_start,
-                "Expected 'STOP'"
-            ))
+            while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
+                result.register_advancement()
+                self.advance()
 
-        result.register_advancement()
-        self.advance()
+            if self.current_token.matches(Token.KEYWORD, Token.STOP):
+                result.register_advancement()
+                self.advance()
+                break
 
         if self.current_token.type != Token.NEWLINE:
             return result.failure(InvalidSyntaxError(
@@ -614,31 +611,28 @@ class Parser:
             result.register_advancement()
             self.advance()
 
-        statement = result.register(self.statement())
-        if result.error: return result
-        cases.append((condition, statement))
+        while True:
+            statement = result.register(self.statement())
+            if result.error: return result
+            cases.append((condition, statement))
 
-        if self.current_token.type != Token.NEWLINE:
-            return result.failure(InvalidSyntaxError(
-                self.current_token.pos_start,
-                "Expected 'NEWLINE'"
-            ))
+            if self.current_token.type != Token.NEWLINE:
+                return result.failure(InvalidSyntaxError(
+                    self.current_token.pos_start,
+                    "Expected 'NEWLINE'"
+                ))
 
-        result.register_advancement()
-        self.advance()
-
-        while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
             result.register_advancement()
             self.advance()
 
-        if not self.current_token.matches(Token.KEYWORD, Token.STOP):
-            return result.failure(InvalidSyntaxError(
-                self.current_token.pos_start,
-                "Expected 'STOP'"
-            ))
+            while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
+                result.register_advancement()
+                self.advance()
 
-        result.register_advancement()
-        self.advance()
+            if self.current_token.matches(Token.KEYWORD, Token.STOP):
+                result.register_advancement()
+                self.advance()
+                break
 
         if self.current_token.type != Token.NEWLINE:
             return result.failure(InvalidSyntaxError(

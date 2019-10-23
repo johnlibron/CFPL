@@ -120,4 +120,5 @@ class Number(Value):
         return copy
 
     def is_true(self):
-        return self.value != 0
+        self.value = True if self.value == Token.TRUE else False
+        return self.value != 0 or self.value != False
