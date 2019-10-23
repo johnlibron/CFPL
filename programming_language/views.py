@@ -11,7 +11,6 @@ from programming_language.semantics.number import Number
 
 def index(request):
     tokens = None
-    ast = None
     errors = []
     output = None
 
@@ -42,7 +41,7 @@ def index(request):
                         errors.append(ast.error.message())
                     else:
                         interpreter = Interpreter()
-                        context = Context('<program>')
+                        context = Context('<source-code>')
                         context.symbol_table = SymbolTable()
                         result = interpreter.visit(ast.node, context)
                         if result.error:
@@ -52,7 +51,6 @@ def index(request):
             
     ctx = {
         'tokens': tokens,
-        'ast': ast,
         'errors': errors,
         'output': output
     }

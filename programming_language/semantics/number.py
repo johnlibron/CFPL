@@ -93,6 +93,26 @@ class Number(Value):
         else:
             return None, Value.illegal_operation(self, other)
 
+    def get_comparison_and(self, other):
+        if isinstance(other, Number):
+            self.value = True if self.value == Token.TRUE else False
+            other.value = True if other.value == Token.TRUE else False
+            return Number(Token.TRUE if self.value and other.value else Token.FALSE).set_context(self.context), None
+        else:
+            return None, Value.illegal_operation(self, other)
+
+    def get_comparison_or(self, other):
+        if isinstance(other, Number):
+            self.value = True if self.value == Token.TRUE else False
+            other.value = True if other.value == Token.TRUE else False
+            return Number(Token.TRUE if self.value or other.value else Token.FALSE).set_context(self.context), None
+        else:
+            return None, Value.illegal_operation(self, other)
+
+    def get_comparison_not(self):
+        self.value = True if self.value == Token.TRUE else False
+        return Number(Token.TRUE if self.value == Token.FALSE else Token.FALSE).set_context(self.context), None
+
     def copy(self):
         copy = Number(self.value)
         copy.set_pos(self.pos_start)

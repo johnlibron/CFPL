@@ -1,5 +1,6 @@
 from programming_language.error_handler.error import RuntimeError
 from programming_language.lexical.token import Token
+from programming_language.semantics.bool import Bool
 from programming_language.semantics.list import List
 from programming_language.semantics.number import Number
 from programming_language.semantics.string import String
@@ -22,7 +23,7 @@ class Interpreter:
         return RuntimeResult().success(String(node.token.value).set_context(context).set_pos(node.pos_start))
 
     def visit_BoolNode(self, node, context):
-        return RuntimeResult().success(String(node.token.value).set_context(context).set_pos(node.pos_start))
+        return RuntimeResult().success(Bool(node.token.value).set_context(context).set_pos(node.pos_start))
 
     def visit_ListNode(self, node, context):
         result = RuntimeResult()
@@ -111,7 +112,7 @@ class Interpreter:
         if node.operator_token.type == Token.MINUS:
             answer, error = number.multiply(Number(-1))
         elif node.operator_token.matches(Token.KEYWORD, Token.NOT):
-            answer, error = number.logical_not()
+            answer, error = number.get_comparison_not()
 
         if error:
             return result.failure(error)

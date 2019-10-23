@@ -16,6 +16,7 @@ class Parser:
 
     def __init__(self, tokens, input_tokens):
         self.tokens = tokens
+        # TODO update tokens in view with the input tokens
         self.input_tokens = input_tokens
         self.token_index = -1
         self.input_token_index = -1
@@ -116,6 +117,7 @@ class Parser:
             if newline_count == 0:
                 more_statements = False
 
+            # evaluate the output variables with its data types
             if self.current_token.matches(Token.KEYWORD, Token.OUTPUT):
                 var_name = self.current_token
                 result.register_advancement()
