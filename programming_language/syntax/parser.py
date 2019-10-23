@@ -293,6 +293,17 @@ class Parser:
         while self.current_token.type == Token.NEWLINE or self.current_token.type == Token.COMMENT:
             result.register_advancement()
             self.advance()
+        
+        if self.current_token.value in Token.KEYWORDS:
+            expr = result.register(self.expr())
+            if result.error:
+                print(result.error.details)
+                return result.failure(InvalidSyntaxError(
+                    self.current_token.pos_start,
+                    "Invalid expr"
+                ))
+
+            return result.success(expr)
 
         if self.current_token.type != Token.IDENTIFIER:
             return result.failure(InvalidSyntaxError(
