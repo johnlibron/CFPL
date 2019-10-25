@@ -1,5 +1,5 @@
 from programming_language.error_handler.error import IllegalCharacterError
-from programming_language.error_handler.error import IllegalVarDeclarationError
+from programming_language.error_handler.error import IllegalVariableDeclarationError
 from programming_language.error_handler.error import InvalidSyntaxError
 from programming_language.error_handler.position import Position
 from programming_language.lexical.token import Token
@@ -41,17 +41,17 @@ class Lexer:
                 tokens.append(self.make_keywords())
                 tokens, error = self.set_default_values(tokens)
                 if error:
-                    return tokens, IllegalVarDeclarationError(pos_start, "" + error + "")
+                    return tokens, IllegalVariableDeclarationError(pos_start, "'" + error + "'")
             elif self.current_char in '"\'':
                 token, error = self.make_string()
                 if error:
                     return tokens, InvalidSyntaxError(pos_start, "" + error + "")
                 tokens.append(token)                
             elif self.current_char == '+':
-                tokens.append(Token(Token.PLUS, pos_start=self.pos)) # Token.POSITIVE
+                tokens.append(Token(Token.PLUS, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '-':
-                tokens.append(Token(Token.MINUS, pos_start=self.pos)) # Token.NEGATIVE
+                tokens.append(Token(Token.MINUS, pos_start=self.pos))
                 self.advance()
             elif self.current_char == '/':
                 tokens.append(Token(Token.DIV, pos_start=self.pos))
@@ -186,7 +186,7 @@ class Lexer:
                                 tokens.insert(length+2, Token(Token.CHAR, String(""), pos_start))
                         else:
                             if data_type != tokens[length+2].type:
-                                return [], "VAR " + tokens[length].value
+                                return [], tokens[length].value
                             data_value = None
                     elif token.type in Token.DATA_TYPES:
                         data_value = token.value

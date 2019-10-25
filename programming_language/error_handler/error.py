@@ -16,7 +16,7 @@ class IllegalCharacterError(Error):
         super().__init__(pos_start, 'Illegal Character', details)
 
         
-class IllegalVarDeclarationError(Error):
+class IllegalVariableDeclarationError(Error):
     
     def __init__(self, pos_start, details):
         super().__init__(pos_start, 'Illegal Variable Declaration', details)

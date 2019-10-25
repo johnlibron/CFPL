@@ -142,18 +142,22 @@ class Interpreter:
             if result.error: return result
             return result.success(expr_value)
 
+        return result.success(Number(0))
+
     def visit_WhileNode(self, node, context):
         result = RuntimeResult()
-        elements = []
+        elements = []        
 
         while True:
             condition = result.register(self.visit(node.condition_node, context))
             if result.error: return result
 
             if not condition.is_true(): break
-            
-            elements.append(result.register(self.visit(node.body_node, context)))
-            if result.error: return result
+
+            for expr in node.body_node:
+                expr_value = result.register(self.visit(expr, context))
+                if result.error: return result
+                elements.append(expr_value)
 
         return result.success(
             List(elements).set_context(context).set_pos(node.pos_start)

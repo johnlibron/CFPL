@@ -10,7 +10,7 @@ class Token:
             self.pos_start = pos_start.copy()
 
     def __repr__(self):
-        if self.value: return f'{self.type}:{self.value}'
+        if self.value != None: return f'{self.type}:{self.value}'
         return f'{self.type}'
 
     def matches(self, type_, value):
